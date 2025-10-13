@@ -10,7 +10,12 @@ function App() {
     if(!socket) return;
     const message = inputref.current.value;
     if(message){
-      socket.send(message);
+      socket.send(JSON.stringify({
+        type: "chat",
+        payload: {
+          message: message
+        }
+      }))
       inputref.current.value = "";
     }
   }
@@ -21,9 +26,17 @@ function App() {
     ws.onopen = () => {
       console.log("Connected to WebSocket server");
       setSocket(ws);
+
+      // Join a room
+      ws.send(JSON.stringify({
+        type: "join",
+        payload: {
+          roomId: "room1"
+        }
+      }))
     };
     ws.onmessage = (event) => {
-      setMessages(prevMessages => [...prevMessages, event.data]);
+      setMessages(prevMessages => [...prevMessages, event.data]);  //
     }
   },[socket])
 
@@ -35,7 +48,7 @@ function App() {
           {/* chat messages will go here */}
            <div className="border-2 border-white w-full h-5/6 mx-auto p-5 rounded-3xl overflow-y-scroll">
              {messages.map((message, index) => (
-                <div key={index} className="text-white mb-2">
+                <div key={index} className="text-white mb-2 bg-slate-500 p-2 rounded-2xl">
                   {message}
                 </div>
              ))}
