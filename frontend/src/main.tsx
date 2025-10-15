@@ -1,8 +1,13 @@
-// import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import './index.css'
-import App from './App.tsx'
+import ReactDOM from "react-dom/client";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import CreatePage from "./page/createpage";
+import ChatPage from "./page/chatpage";
 
-createRoot(document.getElementById('root')!).render(
-  <App />
-)
+ReactDOM.createRoot(document.getElementById("root")!).render(
+  <BrowserRouter>
+    <Routes>
+      <Route path="/" element={<CreatePage />} />
+      <Route path="/chat" element={<ChatPage />} />
+    </Routes>
+  </BrowserRouter>
+);
