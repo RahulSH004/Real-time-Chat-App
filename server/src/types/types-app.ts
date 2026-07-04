@@ -14,6 +14,7 @@ interface Room {
 interface ExtendedSocket extends WebSocket {
   roomIds?: Set <string>;
   userId?: string;
+  authenticated?: boolean;
 }
 
 export type { User, Room, ExtendedSocket };

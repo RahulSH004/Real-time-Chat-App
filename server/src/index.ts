@@ -2,6 +2,7 @@ import { WebSocketServer, WebSocket } from "ws";
 import { randomUUID } from "crypto";
 import { Room, ExtendedSocket } from "./types/types-app";
 import { fileURLToPath } from "url";
+import { verifyToken } from "./shared/jwt";
 
 const rooms = new Map<string, Room>();
 
@@ -38,11 +39,41 @@ export function createServer(port = 0) {
     socket.on("message", msg => {
       try {
         const data = JSON.parse(msg.toString());
+        const extSocket = socket as ExtendedSocket;
+
+        // Gate: only "auth" is allowed until authenticated
+        if (!extSocket.authenticated && data.type !== "auth") {
+          socket.send(JSON.stringify({ type: "error", message: "Authenticate first" }));
+          return;
+        }
 
         switch (data.type) {
+          case "auth": {
+            const token = data.payload?.token;
+            if (!token) {
+              socket.send(JSON.stringify({ type: "error", message: "Token required" }));
+              socket.close();
+              return;
+            }
+
+            const decoded = verifyToken(token);
+            if (!decoded) {
+              socket.send(JSON.stringify({ type: "error", message: "Invalid or expired token" }));
+              socket.close();
+              return;
+            }
+
+            extSocket.authenticated = true;
+            extSocket.userId = decoded.userId;
+
+            console.log(`Socket authenticated as ${decoded.username} (${decoded.userId})`);
+            socket.send(JSON.stringify({ type: "authSuccess", userId: decoded.userId }));
+            break;
+          }
+
           case "create": {
             const roomId = "room-" + randomUUID().slice(0, 6);
-            const userId = data.payload?.userId || "Anonymous";
+            const userId = extSocket.userId!; // guaranteed by gate above
 
             rooms.set(roomId, {
               id: roomId,
@@ -50,10 +81,8 @@ export function createServer(port = 0) {
               createdAt: new Date()
             });
 
-            const extSocket = socket as ExtendedSocket;
             if (!extSocket.roomIds) extSocket.roomIds = new Set();
             extSocket.roomIds.add(roomId);
-            extSocket.userId = userId;
 
             console.log(`Room ${roomId} created by ${userId}`);
 
@@ -66,7 +95,9 @@ export function createServer(port = 0) {
           }
 
           case "join": {
-            const { roomId, userId } = data.payload || {};
+            const { roomId } = data.payload || {};
+            const userId = extSocket.userId!;
+
             if (!roomId || !rooms.has(roomId)) {
               socket.send(JSON.stringify({
                 type: "error",
@@ -86,10 +117,8 @@ export function createServer(port = 0) {
 
             room.users.push({ socket, userId });
 
-            const extSocket = socket as ExtendedSocket;
             if (!extSocket.roomIds) extSocket.roomIds = new Set();
             extSocket.roomIds.add(roomId);
-            extSocket.userId = userId;
 
             console.log(`${userId} joined ${roomId}`);
 
@@ -99,14 +128,8 @@ export function createServer(port = 0) {
           }
 
           case "chat": {
-            const extSocket = socket as ExtendedSocket;
             const { roomId, message } = data.payload || {};
-            const userId = extSocket.userId;
-
-            if (!userId) {
-              socket.send(JSON.stringify({ type: "error", message: "Not identified — join a room first" }));
-              break;
-            }
+            const userId = extSocket.userId!;
 
             if (!roomId) {
               socket.send(JSON.stringify({ type: "error", message: "roomId is required" }));
