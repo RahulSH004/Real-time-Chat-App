@@ -9,7 +9,12 @@
 * 🟢 You can import this file directly.
 */
 
+export const Avatar = {
+  ONE: 'ONE',
+  TWO: 'TWO',
+  THREE: 'THREE',
+  FOUR: 'FOUR',
+  FIVE: 'FIVE'
+} as const
 
-
-// This file is empty because there are no enums in the schema.
-export {}
+export type Avatar = (typeof Avatar)[keyof typeof Avatar]
