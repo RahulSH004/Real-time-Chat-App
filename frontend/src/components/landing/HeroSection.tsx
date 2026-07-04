@@ -67,15 +67,15 @@ export function HeroSection() {
           transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
         >
           <div className="flex items-center gap-3 mb-2">
-            <div
+            {/* <div
               className="flex items-center justify-center w-12 h-12 rounded-2xl"
               style={{
                 background: "linear-gradient(135deg, var(--brand-violet) 0%, var(--brand-pink) 100%)",
                 boxShadow: "0 8px 24px rgba(213, 133, 217, 0.35)",
               }}
             >
-              <Coffee size={24} className="text-white" />
-            </div>
+              {/* <Coffee size={24} className="text-white" /> */}
+             {/* </div> */}
             <span
               className="text-4xl font-bold tracking-tight text-white"
               style={{ fontFamily: "'Geist Variable', sans-serif" }}
@@ -130,12 +130,22 @@ export function HeroSection() {
 
         {/* Headline */}
         <motion.h1
-          className="text-5xl sm:text-6xl lg:text-7xl font-bold leading-[1.08] tracking-tight text-white mb-5"
+          className="text-5xl sm:text-6xl lg:text-7xl font-bold leading-[1.08] tracking-tight mb-5"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.38, delay: 0.22, ease: [0.23, 1, 0.32, 1] }}
         >
-          Real Conversations,{" "}
+          <span
+            style={{
+              background:
+                "linear-gradient(to right, #F2CFDB 0%, #FFFFFF 100%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
+            }}
+          >
+          Real Conversations,
+          </span>{" "}
           <span
             className="block"
             style={{

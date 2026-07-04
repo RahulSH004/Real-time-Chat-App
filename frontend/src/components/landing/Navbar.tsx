@@ -54,7 +54,7 @@ export function Navbar() {
             style={{ color: "var(--brand-pink)" }}
           >
             <Coffee size={20} style={{ color: "var(--brand-pink)" }} />
-            <span>coffee_chat</span>
+            <span className="text-[#F2CFDB]">coffee chat</span>
           </a>
 
           {/* Desktop nav links */}
